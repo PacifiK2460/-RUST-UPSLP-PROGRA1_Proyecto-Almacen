@@ -2,16 +2,16 @@ mod window;
 use crossterm::event::{read, Event};
 
 fn main(){
-    let main = window::menu::menu::New(
+    let _main = window::menu::menu::new(
         vec![
-            window::menu::Opcion::New(
+            window::menu::Opcion::new(
                 "Titulo".to_string(),
                 "Descripcion".to_string(),
                 || {
                     println!("Accion");
                 }
             ),
-            window::menu::Opcion::New(
+            window::menu::Opcion::new(
                 "Titulo".to_string(),
                 "Descripcion".to_string(),
                 || {

@@ -10,7 +10,7 @@ pub struct menu {
 }
 
 impl menu {
-    pub fn New(opciones: Vec<Opcion>) -> menu {
+    pub fn new(opciones: Vec<Opcion>) -> menu {
         menu {
             opciones,
             selected: 0,
@@ -19,7 +19,7 @@ impl menu {
 }
 
 impl Opcion {
-    pub fn New(titulo: String, descripcion: String, accion: fn()) -> Opcion {
+    pub fn new(titulo: String, descripcion: String, accion: fn()) -> Opcion {
         Opcion {
             titulo,
             descripcion,
