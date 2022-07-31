@@ -1,3 +1,5 @@
+use std::io::stdout;
+
 use crossterm::{*, terminal::*, cursor::*, style::{Stylize, Color}, event::{read, Event, KeyEvent, KeyCode}};
 use crossterm::event::Event::Key;
 
@@ -11,6 +13,7 @@ pub struct menu {
     titulo: String,
     opciones: Vec<Opcion>,
     selected: i32,
+    ayuda: Vec<(String,String)>
 }
 
 impl Opcion {
@@ -29,10 +32,23 @@ impl menu {
             titulo,
             opciones,
             selected: 0,
+            ayuda: vec![
+                ("↑".to_string(), "Moverse hacia arriba".to_string()),
+                ("↓".to_string(), "Moverse hacia abajo".to_string()),
+                ("Enter".to_string(), "Seleccionar opción".to_string()),
+                ("Escape".to_string(), "Salir del menú".to_string()),
+            ]
         }
     }
 
-    pub fn draw(&self) {
+    pub fn draw(&mut self) {
+        // Ocultamos el cursor
+        match execute!(stdout(),crossterm::cursor::Hide){
+            Ok(_) => (),
+            Err(e) => {
+                panic!("Error al ocultar el cursor: {}", e);
+            },
+        };
         loop {
             // Limpia la pantalla
             crossterm::terminal::Clear(crossterm::terminal::ClearType::All);
@@ -48,17 +64,28 @@ impl menu {
 
             // Imprimirmos la ayuda
             {
-                todo!();                
+                let size = crossterm::terminal::size().unwrap();
+                
+                match execute!(stdout(), crossterm::cursor::MoveTo(4, size.1 as u16 - self.ayuda.len() as u16)){
+                    Ok(_) => (),
+                    Err(e) => {
+                        panic!("Error al mover el cursor: {}", e);
+                    },
+                };
+                
+                for (tecla, desc) in self.ayuda.iter() {
+                    print!("{} {}\n", 
+                        tecla.clone()
+                            .with(Color::Rgb{r: 185, g: 251,b: 192}),
+                        desc.clone()
+                            .dim()
+                    );
+                }
             }
             
             // Imprimimos las opciones
             self.focus();
-
-            // Ejecutamos la funcion seleccionada
-            {
-
             }
-        }
     }
 
     fn focus(&mut self){
@@ -82,9 +109,13 @@ impl menu {
                                     }
                                 },
                                 KeyCode::Enter => {
+                                    //Ejecutamos la opcion seleccionada
                                     (self.opciones[self.selected as usize].accion)();
                                 }
-                                KeyCode::Left => todo!(),
+                                KeyCode::Left => {
+                                    // Salimos del loop
+                                    break;
+                                },
                                 KeyCode::Null => panic!("No se puede usar la tecla NULL"),
                                 _ => {},
                             }
@@ -93,7 +124,7 @@ impl menu {
                     }
                 },
                 Err(e) => {
-                    panic!("Error: {}", e);
+                    panic!("Unhandled error: {}", e);
                 }
             }
         }
