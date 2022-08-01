@@ -1,4 +1,4 @@
-use std::io::stdout;
+use std::{io::stdout, string};
 
 use crossterm::{*, terminal::*, cursor::*, style::{Stylize, Color}, event::{read, Event, KeyEvent, KeyCode}};
 use crossterm::event::Event::Key;
@@ -49,43 +49,49 @@ impl menu {
                 panic!("Error al ocultar el cursor: {}", e);
             },
         };
-        loop {
-            // Limpia la pantalla
-            crossterm::terminal::Clear(crossterm::terminal::ClearType::All);
-            // Imprimimos el titulo
-            {
-                crossterm::cursor::MoveTo(4, 2);
-                print!("{}", 
-                    self.titulo.clone()
-                        .with(Color::Rgb{r: 255, g: 255,b: 255})
-                        .on(Color::Rgb{r: 16,g:  158,b: 94})
+        // Limpia la pantalla
+        crossterm::terminal::Clear(crossterm::terminal::ClearType::All);
+        // Imprimimos el titulo
+        {
+            crossterm::cursor::MoveTo(4, 2);
+            print!("{}", 
+                self.titulo.clone()
+                    .with(Color::Rgb{r: 255, g: 255,b: 255})
+                    .on(Color::Rgb{r: 16,g:  158,b: 94})
+            );
+        }
+
+        // Imprimirmos la ayuda
+        {
+            let size = crossterm::terminal::size().unwrap();
+            
+            match execute!(stdout(), crossterm::cursor::MoveTo(4, size.1 as u16 - self.ayuda.len() as u16)){
+                Ok(_) => (),
+                Err(e) => {
+                    panic!("Error al mover el cursor: {}", e);
+                },
+            };
+            
+            for (tecla, desc) in self.ayuda.iter() {
+                print!("{} {}\n", 
+                    tecla.clone()
+                        .with(Color::Rgb{r: 185, g: 251,b: 192}),
+                    desc.clone()
+                        .dim()
                 );
             }
-
-            // Imprimirmos la ayuda
-            {
-                let size = crossterm::terminal::size().unwrap();
-                
-                match execute!(stdout(), crossterm::cursor::MoveTo(4, size.1 as u16 - self.ayuda.len() as u16)){
-                    Ok(_) => (),
-                    Err(e) => {
-                        panic!("Error al mover el cursor: {}", e);
-                    },
-                };
-                
-                for (tecla, desc) in self.ayuda.iter() {
-                    print!("{} {}\n", 
-                        tecla.clone()
-                            .with(Color::Rgb{r: 185, g: 251,b: 192}),
-                        desc.clone()
-                            .dim()
-                    );
-                }
-            }
-            
-            // Imprimimos las opciones
-            self.focus();
-            }
+        }
+        
+        // Imprimimos las opciones
+        self.focus();
+        
+        // Mostramos el cursor
+        match execute!(stdout(),crossterm::cursor::Show){
+            Ok(_) => (),
+            Err(e) => {
+                panic!("Error al mostrar el cursor: {}", e);
+            },
+        };
     }
 
     fn focus(&mut self){
@@ -131,6 +137,31 @@ impl menu {
     }
 
     fn display(&self){
-        todo!();
+        // Nos movemos al inicio de la pantalla
+        let x = 4;
+        match execute!(stdout(), crossterm::cursor::MoveTo(x, 3)){
+            Ok(_) => (),
+            Err(e) => {
+                panic!("Error al mover el cursor: {}", e);
+            },
+        };
+        
+        // Imprimimos las opciones y sus descripciones
+        for (actual, opcion) in self.opciones.iter().enumerate() {
+            let opcionTitulo = "▏".to_string().push_str(&opcion.titulo);
+            let opcionDesc = "▏".to_string().push_str(&opcion.titulo);
+
+            // Imprimimos las opciones
+            if actual == self.selected as usize {
+                print!("{}\n{}", 
+                    menuvline.push_str(&opcion.titulo)
+                        .with(Color::Rgb{r: 255, g: 255,b: 255}),
+                );
+            } else {
+
+            }
+
+        }
+
     }
 }
